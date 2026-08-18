@@ -1,0 +1,44 @@
+{
+  "info": {
+    "_postman_id": "c0ff2c1f-5a6d-4c34-9f0f-coffeenchill-p1",
+    "name": "CoffeeNChill Part 1 - Full API QA",
+    "description": "Part 1 collection covering five Menu endpoints, three Staff Document endpoints, and explicit failure scenarios. Uses the collection variable {{baseUrl}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:7071/api"
+    },
+    {
+      "key": "menuCategory",
+      "value": "Hot Drinks"
+    },
+    {
+      "key": "menuItemId",
+      "value": "COF-001"
+    },
+    {
+      "key": "missingMenuItemId",
+      "value": "DOES-NOT-EXIST"
+    },
+    {
+      "key": "documentFileName",
+      "value": "staff-guide.pdf"
+    },
+    {
+      "key": "missingDocumentFileName",
+      "value": "missing-document.pdf"
+    }
+  ],
+  "item": [
+    {
+      "name": "Menu",
+      "item": []
+    },
+    {
+      "name": "Staff Documents",
+      "item": []
+    }
+  ]
+}
