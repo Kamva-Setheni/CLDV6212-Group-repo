@@ -32,13 +32,423 @@
     }
   ],
   "item": [
-    {
+        {
       "name": "Menu",
-      "item": []
+      "item": [
+        {
+          "name": "Create Menu Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/menu",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"{{menuCategory}}\",\n  \"id\": \"{{menuItemId}}\",\n  \"name\": \"Espresso\",\n  \"description\": \"Single espresso shot\",\n  \"price\": 28.5,\n  \"isAvailable\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Create returns 201 Created\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "  pm.response.to.be.json;",
+                  "});",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Created item contains required fields\", function () {",
+                  "  pm.expect(data).to.have.property(\"category\");",
+                  "  pm.expect(data).to.have.property(\"id\");",
+                  "  pm.expect(data).to.have.property(\"name\");",
+                  "  pm.expect(data).to.have.property(\"description\");",
+                  "  pm.expect(data).to.have.property(\"price\");",
+                  "  pm.expect(data).to.have.property(\"isAvailable\");",
+                  "});",
+                  "pm.collectionVariables.set(\"menuCategory\", data.category);",
+                  "pm.collectionVariables.set(\"menuItemId\", data.id);"
+                ]
+              }
+            }
+                   ]
+        },
+        {
+          "name": "Get All Menu Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/menu"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Get all returns 200 OK\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Response is an array\", function () {",
+                  "  pm.expect(data).to.be.an(\"array\");",
+                  "});",
+                  "pm.test(\"Every menu item has an id and category\", function () {",
+                  "  data.forEach(item => {",
+                  "    pm.expect(item).to.have.property(\"id\");",
+                  "    pm.expect(item).to.have.property(\"category\");",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+                    ]
+        },
+        {
+          "name": "Get Menu Items By Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/menu/category/{{menuCategory}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Category query returns 200 OK\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Response is an array\", function () {",
+                  "  pm.expect(data).to.be.an(\"array\");",
+                  "});",
+                  "pm.test(\"All returned items belong to requested category\", function () {",
+                  "  data.forEach(item => {",
+                  "    pm.expect(item.category).to.eql(pm.collectionVariables.get(\"menuCategory\"));",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+                    ]
+        },
+        {
+          "name": "Update Menu Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/menu/{{menuCategory}}/{{menuItemId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 32.0,\n  \"isAvailable\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Update returns 200 OK\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Updated values are returned\", function () {",
+                  "  pm.expect(data.price).to.eql(32);",
+                  "  pm.expect(data.isAvailable).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+                    ]
+        },
+        {
+          "name": "Delete Menu Item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/menu/{{menuCategory}}/{{menuItemId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Delete returns 204 No Content\", function () {",
+                  "  pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+            ]
     },
     {
+      "name": "Menu Failure Scenarios",
+      "item": [
+        {
+          "name": "Create Invalid Menu Item - 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/menu",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"{{menuCategory}}\",\n  \"id\": \"INVALID-001\",\n  \"name\": \"\",\n  \"description\": \"Missing name should fail\",\n  \"price\": 10,\n  \"isAvailable\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Invalid create returns 400 Bad Request\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Duplicate Menu Item - 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/menu",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"{{menuCategory}}\",\n  \"id\": \"{{menuItemId}}\",\n  \"name\": \"Duplicate Espresso\",\n  \"description\": \"Duplicate ID should fail\",\n  \"price\": 30,\n  \"isAvailable\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Duplicate create returns 409 Conflict\", function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Missing Item - 404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/menu/{{menuCategory}}/{{missingMenuItemId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 99.0,\n  \"isAvailable\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Missing update returns 404 Not Found\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Missing Item - 404",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/menu/{{menuCategory}}/{{missingMenuItemId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Missing delete returns 404 Not Found\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+               {
       "name": "Staff Documents",
-      "item": []
+      "item": [
+        {
+          "name": "Upload Staff Document",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/documents/upload",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "staff-guide.pdf"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Upload returns a successful 2xx status\", function () {",
+                  "  pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Staff Documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/documents"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"List documents returns 200 OK\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Document list is an array\", function () {",
+                  "  pm.expect(data).to.be.an(\"array\");",
+                  "});",
+                  "pm.test(\"Document metadata has expected fields\", function () {",
+                  "  data.forEach(file => {",
+                  "    pm.expect(file).to.have.property(\"fileName\");",
+                  "    pm.expect(file).to.have.property(\"size\");",
+                  "    pm.expect(file).to.have.property(\"lastModified\");",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+                    ]
+        },
+        {
+          "name": "Download Staff Document",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/documents/download/{{documentFileName}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Download returns 200 OK\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Download has content\", function () {",
+                  "  pm.expect(pm.response.size()).to.be.greaterThan(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Download Missing Document - 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/documents/download/{{missingDocumentFileName}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Missing document returns 404 Not Found\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
-  ]
-}
