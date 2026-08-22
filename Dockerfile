@@ -1,5 +1,6 @@
 #First step: Building the dock
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
 
 #Then copying the csproj for better layer caching
 COPY *.csproj ./
