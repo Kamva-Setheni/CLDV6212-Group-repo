@@ -5,8 +5,9 @@ using Microsoft.Azure.Functions.Worker.OpenTelemetry;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenTelemetry;
-using CoffeeAndChill.Interface;   
-using CoffeeAndChill.Services;   
+using CoffeeAndChill.Interface;
+using CoffeeAndChill.Services;
+
 var builder = FunctionsApplication.CreateBuilder(args);
 builder.ConfigureFunctionsWebApplication();
 
@@ -19,3 +20,4 @@ if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHT
         .UseFunctionsWorkerDefaults()
         .UseAzureMonitorExporter();
 }
+builder.Build().Run();
