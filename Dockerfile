@@ -1,12 +1,17 @@
 #First step: Building the dock
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
 
 #Then copying the csproj for better layer caching
-COPY *.csproj ./
+COPY ["CoffeeAndChill.csproj", "./"]
+
+#Restore NuGet packages
 RUN dotnet restore
 
 #Then copying the rest of the source and publishing the application
 COPY . .
+
+#Build and publish the application to the /app/publish folder
 RUN dotnet publish CoffeeAndChill.csproj -c Release -o /app/publish
 
 #Second step: Building the runtime image
@@ -17,3 +22,12 @@ ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
 	AzureFunctionsJobHost__Logging__Console__IsEnabled=true
 
 COPY --from=build /app/publish .
+
+#Declaring the port on which the container will listen for requests
+EXPOSE 80
+
+#Creating a non-root user to run the application
+RUN useradd -m appuser
+
+#Switching to the non-root user
+USER appuser
