@@ -1,6 +1,6 @@
-bin/
-obj/
-.vs/
-.git/
-.gitignore
+.git
+.vs
+bin
+obj
+local.settings.json
 README.md
