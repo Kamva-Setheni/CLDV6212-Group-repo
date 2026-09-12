@@ -1,21 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
- 
-    public class UpdateMenuItemRequest
-    {
-        //Upadted Menu item name name
-        public string Name { get; set; } = string.Empty;
+namespace CoffeeAndChill.DTOs;
 
-        //Upadted Description
-        public string Description { get; set; } = string.Empty;
-
-        //Upadted Price
-        public double Price { get; set; }
-
-        //Upadted availability
-        public bool IsAvailable { get; set; }
-
-
-
-    }
+public class UpdateMenuItemRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public double Price { get; set; }
+    public bool IsAvailable { get; set; }
+}
