@@ -1,156 +1,117 @@
-﻿using Azure;
+using Azure;
 using Azure.Data.Tables;
+using CoffeeAndChill.DTOs;
+using CoffeeAndChill.Interfaces;
 using CoffeeAndChill.Models;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
- 
 
-namespace CoffeeNChill.Functions.Services
+namespace CoffeeAndChill.Services;
+
+public class TableStorageService : ITableStorageService
 {
-    public class TableStorageService : ITableStorageService
+    private readonly TableClient _tableClient;
+
+    public TableStorageService(IConfiguration configuration)
     {
+        var connectionString = configuration["AzureWebJobsStorage"]
+            ?? throw new InvalidOperationException("AzureWebJobsStorage connection string is missing.");
+        _tableClient = new TableClient(connectionString, "MenuItems");
+        _tableClient.CreateIfNotExists();
+    }
 
-        // Add Private Field
-        private readonly TableClient _tableClient;
-
-        // Adding Constructor
-        public TableStorageService(IConfiguration configuration)
+    public async Task<MenuItems> CreateMenuItemAsync(CreateMenuItemRequest request)
+    {
+        var menuItem = new MenuItems
         {
-            string connectionString =
-                configuration["AzureWebJobsStorage"]
-                ?? throw new InvalidOperationException(
-                    "AzureWebJobsStorage connection string is missing.");
+            PartitionKey = request.Category,
+            RowKey = request.SKU,
+            Category = request.Category,
+            Name = request.Name,
+            Description = request.Description,
+            Price = request.Price,
+            IsAvailable = request.IsAvailable
+        };
 
-            _tableClient = new TableClient(connectionString, "MenuItems");
-
-            _tableClient.CreateIfNotExists();
-        }
-
-        public async Task<MenuItems> CreateMenuItemAsync(CreateMenuItemRequest request)
+        try
         {
-            // Create a new MenuItem entity
-            MenuItems menuItem = new MenuItems
-            {
-                PartitionKey = request.Catergory,
-                RowKey = request.SKU,
-                Name = request.Name,
-                Description = request.Description,
-                Price = request.Price
-                
-                
-                
-                
-                
-                ,
-                IsAvailable = request.IsAvailable
-            };
-
-            // Save to Azure Table Storage
             await _tableClient.AddEntityAsync(menuItem);
-
             return menuItem;
         }
-
-
-        public async Task<bool> DeleteMenuItemAsync(string category, string sku)
+        catch (RequestFailedException ex) when (ex.Status == 409)
         {
-            try
-            {
-                // Retrieve the entity to obtain its ETag
-                Response<MenuItems> response =
-                    await _tableClient.GetEntityAsync<MenuItems>(category, sku);
+            throw new InvalidOperationException(
+                "A menu item with this SKU already exists in this category.", ex);
+        }
+    }
 
-                // Delete the entity
-                await _tableClient.DeleteEntityAsync(
-                    category,
-                    sku,
-                    response.Value.ETag);
-
-                return true;
-            }
-            catch (RequestFailedException ex) when (ex.Status == 404)
-            {
-                return false;
-            }
+    public async Task<bool> DeleteMenuItemAsync(string category, string sku)
+    {
+        var menuItem = await GetMenuItemAsync(category, sku);
+        if (menuItem is null)
+        {
+            return false;
         }
 
-
-        public async Task<List<MenuItems>> GetAllMenuItemsAsync()
+        try
         {
-            List<MenuItems> menuItems = new List<MenuItems>();
+            await _tableClient.DeleteEntityAsync(category, sku, menuItem.ETag);
+            return true;
+        }
+        catch (RequestFailedException ex) when (ex.Status == 404)
+        {
+            return false;
+        }
+    }
 
-            await foreach (MenuItems item in _tableClient.QueryAsync<MenuItems>())
-            {
-                menuItems.Add(item);
-            }
-
-            return menuItems;
+    public async Task<List<MenuItems>> GetAllMenuItemsAsync()
+    {
+        var menuItems = new List<MenuItems>();
+        await foreach (var item in _tableClient.QueryAsync<MenuItems>())
+        {
+            menuItems.Add(item);
         }
 
+        return menuItems;
+    }
 
-        public async Task<MenuItems?> GetMenuItemsAsync(string category, string sku)
+    public async Task<MenuItems?> GetMenuItemAsync(string category, string sku)
+    {
+        try
         {
-            try
-            {
-                Response<MenuItems> response =
-                    await _tableClient.GetEntityAsync<MenuItems>(category, sku);
+            var response = await _tableClient.GetEntityAsync<MenuItems>(category, sku);
+            return response.Value;
+        }
+        catch (RequestFailedException ex) when (ex.Status == 404)
+        {
+            return null;
+        }
+    }
 
-                return response.Value;
-            }
-            catch (RequestFailedException ex) when (ex.Status == 404)
-            {
-                return null;
-            }
+    public async Task<List<MenuItems>> GetMenuItemsByCategoryAsync(string category)
+    {
+        var menuItems = new List<MenuItems>();
+        var escapedCategory = category.Replace("'", "''", StringComparison.Ordinal);
+        await foreach (var item in _tableClient.QueryAsync<MenuItems>($"PartitionKey eq '{escapedCategory}'"))
+        {
+            menuItems.Add(item);
         }
 
-        public async Task<List<MenuItems>> GetMenuItemsByCatergoryAsync(string category)
+        return menuItems;
+    }
+
+    public async Task<MenuItems?> UpdateMenuItemAsync(string category, string sku, UpdateMenuItemRequest request)
+    {
+        var menuItem = await GetMenuItemAsync(category, sku);
+        if (menuItem is null)
         {
-            List<MenuItems> menuItems = new List<MenuItems>();
-
-            string filter = $"PartitionKey eq '{category}'";
-
-            await foreach (MenuItems item in _tableClient.QueryAsync<MenuItems>(filter))
-            {
-                menuItems.Add(item);
-            }
-
-            return menuItems;
+            return null;
         }
 
-
-        public async Task<MenuItems> UpdateMenuItemAsync(
-            string category,
-            string sku,
-            UpdateMenuItemRequest request)
-        {
-            try
-            {
-                // Retrieve the existing entity
-                Response<MenuItems> response =
-                    await _tableClient.GetEntityAsync<MenuItems>(category, sku);
-
-                MenuItems menuItem = response.Value;
-
-                // Update the entity
-                menuItem.Name = request.Name;
-                menuItem.Description = request.Description;
-                menuItem.Price = request.Price;
-                menuItem.IsAvailable = request.IsAvailable;
-
-                // Save the updated entity
-                await _tableClient.UpdateEntityAsync(
-                    menuItem,
-                    menuItem.ETag,
-                    TableUpdateMode.Replace);
-
-                return menuItem;
-            }
-            catch (RequestFailedException ex) when (ex.Status == 404)
-            {
-                return null;
-            }
-        }
+        menuItem.Name = request.Name;
+        menuItem.Description = request.Description;
+        menuItem.Price = request.Price;
+        menuItem.IsAvailable = request.IsAvailable;
+        await _tableClient.UpdateEntityAsync(menuItem, menuItem.ETag, TableUpdateMode.Replace);
+        return menuItem;
     }
 }

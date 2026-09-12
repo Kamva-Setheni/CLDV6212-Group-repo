@@ -1,5 +1,6 @@
-﻿using System.Text.Json;
-namespace CoffeeNChill.Functions.Services;
+using System.Text.Json;
+
+namespace CoffeeAndChill.Services;
 
 public static class MenuJson
 {
