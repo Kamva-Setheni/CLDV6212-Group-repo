@@ -1,6 +1,6 @@
-﻿using CoffeeAndChill.Models;
+using CoffeeAndChill.Models;
 
-namespace CoffeeAndChill.Interface;
+namespace CoffeeAndChill.Interfaces;
 
 public interface IDocumentStorageService
 {
