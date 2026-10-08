@@ -1,6 +1,8 @@
-# Docker Commands - Part 1 (standalone containers, no Compose)
+# Docker Commands - Parts 1 and 2
 
-Part 1 uses standalone containers only. Do not add a `docker-compose.yml` file.
+Part 1 uses standalone containers only. Part 2 adds `docker-compose.yml` for the required
+two-container orchestration. Use the Part 2 commands after the v2.0 image has been built and
+published by the authenticated Docker Hub owner.
 
 ## 1. Create a shared network
 
@@ -48,7 +50,7 @@ functions. Test every route against `http://localhost:7071/api`.
 > Important: the Part 1 addendum requires Azure Blob Storage, which Azurite emulates.
 > The `staff-docs` Blob container is created automatically on the first permitted upload.
 
-## 6. Publish the required images
+## 6. Publish the Part 1 images
 
 ```powershell
 docker login
@@ -61,6 +63,38 @@ docker push lesegokhaole/coffeenchill-azurite:v1.0
 ```
 
 Only the authenticated Docker Hub owner should run the push commands.
+
+## Part 2 - Compose orchestration
+
+The Part 2 Compose file must reference a versioned Docker Hub image through `image:`, not a
+local `build:` entry. It has a custom bridge network, a named Azurite data volume, and a
+Functions-to-Azurite connection string that uses the `coffeenchill-azurite` service name. Its
+Azurite command uses `--skipApiVersionCheck` so newer Azure SDK clients can be exercised against
+the local emulator; that flag is not used with a real Azure Storage service.
+
+```powershell
+# Build and tag the exact image declared by docker-compose.yml.
+docker build -t lesegokhaole/coffeenchill-functions:v2.0 .
+
+# The account owner may then publish it. Do not push unless you own the account.
+docker push lesegokhaole/coffeenchill-functions:v2.0
+
+# Validate the configuration, pull images, and start the full Part 2 stack.
+docker compose config
+docker compose pull
+docker compose up -d
+docker compose ps
+docker compose logs -f functions
+```
+
+For the final clean-state verification, remove the Compose containers and its test data before
+pulling the public image again:
+
+```powershell
+docker compose down -v
+docker compose pull
+docker compose up -d
+```
 
 ## 7. Pulling images on a clean machine
 
