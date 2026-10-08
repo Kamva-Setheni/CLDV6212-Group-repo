@@ -1,14 +1,19 @@
 {
   "info": {
     "_postman_id": "a7e04b8d-c3c3-47da-ae2b-572d68a775b7",
-    "name": "CoffeeNChill Part 1 API",
-    "description": "Part 1 verification collection for the eight CoffeeNChill HTTP endpoints. Run requests in order; attach an allowed sample document to the upload-success request before running it.",
+    "name": "CoffeeNChill Part 1 and Part 2 API",
+    "description": "Verification collection for all CoffeeNChill HTTP endpoints. Run the Part 1 folders in order; attach an allowed sample document to the upload-success request. For Part 2, queue an order and then poll its status until it reaches Collected.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
       "value": "http://localhost:7071/api",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "ORD-2026-8801",
       "type": "string"
     }
   ],
@@ -125,6 +130,47 @@
           "name": "Download Staff Document - Not Found",
           "request": { "method": "GET", "description": "Verifies a request for a missing staff document returns not found.", "url": "{{baseUrl}}/documents/download/does-not-exist.pdf" },
           "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 404', () => pm.response.to.have.status(404));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Orders Queue",
+      "item": [
+        {
+          "name": "Queue Order - Success",
+          "request": {
+            "method": "POST",
+            "description": "Queues a valid order and verifies the client receives an immediate accepted response rather than waiting for preparation.",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"customerName\": \"Jane Smith\",\n  \"selectedItemSKUs\": [\"COF-001\", \"PAS-104\"],\n  \"totalPrice\": 65.00,\n  \"orderTimestamp\": \"2026-10-12T10:15:00Z\"\n}" },
+            "url": "{{baseUrl}}/orders/queue"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 202', () => pm.response.to.have.status(202));", "const body = pm.response.json();", "pm.expect(body.orderId).to.eql(pm.collectionVariables.get('orderId'));", "pm.expect(body.queue).to.eql('order-processing-queue');", "pm.expect(body.statusUrl).to.contain('/orders/');"] } }]
+        },
+        {
+          "name": "Get Order Status - Existing",
+          "request": {
+            "method": "GET",
+            "description": "Run after Queue Order - Success. If the worker is still processing, send this request again until the status is Collected.",
+            "url": "{{baseUrl}}/orders/{{orderId}}/status"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));", "const body = pm.response.json();", "pm.expect(body.orderId).to.eql(pm.collectionVariables.get('orderId'));", "pm.expect(body.status).to.be.oneOf(['Received', 'Preparing', 'Ready', 'Collected']);", "pm.expect(body).to.have.property('lastUpdated');"] } }]
+        },
+        {
+          "name": "Get Order Status - Not Found",
+          "request": { "method": "GET", "description": "Verifies the order status endpoint returns a JSON error for an unknown order.", "url": "{{baseUrl}}/orders/ORD-DOES-NOT-EXIST/status" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 404', () => pm.response.to.have.status(404));", "pm.expect(pm.response.json()).to.have.property('error');"] } }]
+        },
+        {
+          "name": "Queue Order - Validation Failure",
+          "request": {
+            "method": "POST",
+            "description": "Verifies invalid order data is rejected before it reaches the queue.",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"orderId\": \"\",\n  \"customerName\": \"\",\n  \"selectedItemSKUs\": [],\n  \"totalPrice\": 0\n}" },
+            "url": "{{baseUrl}}/orders/queue"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().errors).to.be.an('array');", "pm.expect(pm.response.json().errors.length).to.be.greaterThan(0);"] } }]
         }
       ]
     }

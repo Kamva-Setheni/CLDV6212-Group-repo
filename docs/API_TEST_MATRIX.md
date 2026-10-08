@@ -1,4 +1,4 @@
-# Part 1 API Test Matrix
+# CoffeeNChill API Test Matrix
 
 Run these tests against the final running Functions host. Keep the Collection Runner
 result and the listed evidence only after the response has genuinely passed.
@@ -25,3 +25,21 @@ result and the listed evidence only after the response has genuinely passed.
 2. Run M01, M02, M03, M04, M05, M06, M07, and M08 in that order.
 3. Upload one permitted staff document, then run D02, D03, D04, and D05.
 4. Save one full successful Postman Collection Runner result for final evidence.
+
+## Part 2 order queue tests
+
+| ID | Owner | Request | Expected result | Evidence to provide |
+|---|---|---|---|---|
+| Q01 | Lesego | `POST /api/orders/queue` with the documented valid order JSON | `202 Accepted`; response contains the order ID, queue name, and status URL | Postman response and Functions log showing queue receipt |
+| Q02 | Lesego | Poll `GET /api/orders/{orderId}/status` after Q01 | `200 OK`; status moves through `Received`, `Preparing`, `Ready`, and `Collected` | Postman responses or Orders-table view |
+| Q03 | Lesego | `GET /api/orders/ORD-DOES-NOT-EXIST/status` | `404 Not Found` with a JSON `error` | Postman response |
+| Q04 | Lesego | Invalid `POST /api/orders/queue` with missing required fields | `400 Bad Request` with an `errors` array | Postman response |
+| Q05 | Lesego | Place malformed JSON directly on `order-processing-queue` | Three logged delivery failures; message moves to `order-processing-queue-poison` | Functions log and Storage Explorer poison-queue view |
+
+### Part 2 execution order
+
+1. Build the v2.0 Functions image, then start the services using `docker compose up -d`.
+2. Run Q01 and poll Q02 until the returned `status` is `Collected`.
+3. Run Q03 and Q04.
+4. Run Q05 last so the poison message remains visible for evidence.
+5. Save the final Postman result, Functions logs, Orders-table entity, and poison-queue screenshot.
