@@ -125,7 +125,7 @@ live in [docs/evidence/](docs/evidence/).
 
 ### 1. Standalone Docker containers running
 
-![Docker Desktop showing coffeenchill-azurite and coffeenchill-functions running as separate containers](docs/evidence/01_Docker_Standalone_Containers_Running.png)
+![Docker Desktop showing coffeenchill-azurite and coffeenchill-functions running as separate containers](docs/evidence/part1/01_Docker_Standalone_Containers_Running.png)
 
 Docker Desktop showing the two containers running independently, `coffeenchill-azurite`
 and `coffeenchill-functions`, with no Docker Compose involved. The Functions `7071:80`
@@ -133,7 +133,7 @@ port mapping and the Azurite port bindings are both visible.
 
 ### 2. Azurite and Functions Docker logs
 
-![Docker logs showing the Functions container calling ListStaffDocuments and Azurite receiving the storage operation](docs/evidence/02_Azurite_and_Functions_Docker_Logs.png)
+![Docker logs showing the Functions container calling ListStaffDocuments and Azurite receiving the storage operation](docs/evidence/part1/02_Azurite_and_Functions_Docker_Logs.png)
 
 Docker logs showing `coffeenchill-functions` handling a `ListStaffDocuments` request while
 `coffeenchill-azurite` receives the matching storage operations, confirming that the
@@ -141,7 +141,7 @@ Functions API is actually talking to local Azurite Blob Storage rather than mock
 
 ### 3. Full Postman collection passing
 
-![Postman Collection Runner reporting all 14 tests passed](docs/evidence/03_Postman_All_14_Tests_Passed.png)
+![Postman Collection Runner reporting all 14 tests passed](docs/evidence/part1/03_Postman_All_14_Tests_Passed.png)
 
 The Postman Collection Runner reporting **All 14, Passed 14, Failed 0, Skipped 0, Errors
 0**, confirming that the committed collection covers every required Menu and Staff
@@ -149,7 +149,7 @@ Document endpoint and that all saved tests pass together in one run.
 
 ### 4. Document list returned from Azurite Blob Storage
 
-![GET /api/documents returning 200 OK and listing staff-document.pdf](docs/evidence/04_Azurite_Blob_Document_List_200_OK.png)
+![GET /api/documents returning 200 OK and listing staff-document.pdf](docs/evidence/part1/04_Azurite_Blob_Document_List_200_OK.png)
 
 `GET /api/documents` returning `200 OK` and listing `staff-document.pdf` with its size and
 last-modified time, confirming the document was stored and retrieved correctly through the
@@ -157,7 +157,7 @@ Azure Blob Storage implementation.
 
 ### 5. Staff document workflow passing
 
-![Postman runner showing the upload error case, listing, download, and missing-file case all passing](docs/evidence/05_Postman_Document_Workflow_Passed.png)
+![Postman runner showing the upload error case, listing, download, and missing-file case all passing](docs/evidence/part1/05_Postman_Document_Workflow_Passed.png)
 
 The runner covering the Staff Documents workflow end to end: the no-file upload error
 case, the document listing, a successful download, and the missing-file `404` response —

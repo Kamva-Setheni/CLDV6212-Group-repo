@@ -1,0 +1,38 @@
+name: coffeenchill-part2
+
+services:
+  coffeenchill-azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    # Azure SDK queue clients can use a newer storage API version than Azurite.
+    # This emulator-only switch keeps local Compose testing compatible.
+    command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --location /data --skipApiVersionCheck
+    ports:
+      - "10000:10000" # Blob
+      - "10001:10001" # Queue
+      - "10002:10002" # Table
+    volumes:
+      - azurite-data:/data
+    networks:
+      - coffeenchill-net
+
+  functions:
+    # Required by the Part 2 rubric: Compose pulls the published versioned Functions image.
+    # Build this source as lesegokhaole/coffeenchill-functions:v2.0 before clean-machine testing.
+    image: lesegokhaole/coffeenchill-functions:v2.0
+    depends_on:
+      - coffeenchill-azurite
+    environment:
+      FUNCTIONS_WORKER_RUNTIME: dotnet-isolated
+      AzureWebJobsStorage: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://coffeenchill-azurite:10000/devstoreaccount1;QueueEndpoint=http://coffeenchill-azurite:10001/devstoreaccount1;TableEndpoint=http://coffeenchill-azurite:10002/devstoreaccount1;
+      ORDER_STEP_DELAY_SECONDS: "5"
+    ports:
+      - "7071:80"
+    networks:
+      - coffeenchill-net
+
+networks:
+  coffeenchill-net:
+    driver: bridge
+
+volumes:
+  azurite-data:
