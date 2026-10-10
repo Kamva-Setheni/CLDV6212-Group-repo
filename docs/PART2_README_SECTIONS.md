@@ -6,7 +6,7 @@ Functions host. The Compose file intentionally uses a published image reference 
 
 ```powershell
 # Hlogi builds the current source before publishing this exact v2.0 tag.
-docker build -t lesegokhaole/coffeenchill-functions:v2.0 .
+docker build -t heistherealhlogi/coffeenchill-functions:v2.0 .
 docker compose config
 docker compose up -d
 docker compose ps
@@ -85,7 +85,7 @@ EXPOSE 80
 COPY --from=build /app/publish .
 ```
 
-The completed image is tagged as `lesegokhaole/coffeenchill-functions:v2.0` for Part 2 Compose
+The completed image is tagged as `heistherealhlogi/coffeenchill-functions:v2.0` for Part 2 Compose
 use. Docker Hub publication is performed only by the authenticated account owner.
 
 ## Part 2 changelog

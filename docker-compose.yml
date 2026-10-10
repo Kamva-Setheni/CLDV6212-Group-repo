@@ -17,8 +17,8 @@ services:
 
   functions:
     # Required by the Part 2 rubric: Compose pulls the published versioned Functions image.
-    # Build this source as lesegokhaole/coffeenchill-functions:v2.0 before clean-machine testing.
-    image: lesegokhaole/coffeenchill-functions:v2.0
+    # Build this source as heistherealhlogi/coffeenchill-functions:v2.0 before clean-machine testing.
+    image: heistherealhlogi/coffeenchill-functions:v2.0
     depends_on:
       - coffeenchill-azurite
     environment:

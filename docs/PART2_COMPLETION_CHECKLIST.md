@@ -6,7 +6,7 @@
 - `Order` message contract, queue producer, queue trigger, Orders-table lifecycle, and status endpoint are implemented.
 - Queue retry, Base64 encoding, and poison-queue settings are in `host.json`.
 - `docker-compose.yml` defines the required Azurite and Functions services, custom bridge network,
-  named Azurite data volume, port mappings, and `image: lesegokhaole/coffeenchill-functions:v2.0`.
+  named Azurite data volume, port mappings, and `image: heistherealhlogi/coffeenchill-functions:v2.0`.
 - The Postman collection contains 18 requests across Menu Items, Staff Documents, and Orders Queue.
 - The README includes the Part 2 changelog, Compose instructions, Dockerfile syntax, roles, and
   an explicit video-link placeholder.
@@ -24,7 +24,7 @@
 These are intentionally not marked complete because they require Docker Desktop to be running and,
 where applicable, the authenticated Docker Hub owner or a real human video presentation:
 
-1. Publish the locally built `lesegokhaole/coffeenchill-functions:v2.0` image from the authenticated
+1. Publish the locally built `heistherealhlogi/coffeenchill-functions:v2.0` image from the authenticated
    Docker Hub account, then re-run Compose after a clean `docker compose pull`.
 2. Run the expanded Part 2 Postman collection and retain its run-result evidence.
 3. Capture the Orders-table lifecycle and a poison-queue message after three failed attempts for
