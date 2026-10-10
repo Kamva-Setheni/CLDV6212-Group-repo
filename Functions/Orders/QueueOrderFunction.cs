@@ -51,7 +51,7 @@ public sealed class QueueOrderFunction
             CustomerName = body.CustomerName!.Trim(),
             SelectedItemSKUs = body.SelectedItemSKUs!.Select(sku => sku.Trim()).ToList(),
             TotalPrice = body.TotalPrice,
-            OrderTimestamp = body.OrderTimestamp!.Value
+            OrderTimestamp = body.OrderTimestamp ?? DateTimeOffset.UtcNow
         };
 
         var queue = await OrderQueue.GetAsync();
@@ -82,7 +82,6 @@ public sealed class QueueOrderFunction
         if (body.SelectedItemSKUs is null || body.SelectedItemSKUs.Count == 0 || body.SelectedItemSKUs.Any(string.IsNullOrWhiteSpace))
             errors.Add("SelectedItemSKUs must contain at least one SKU.");
         if (body.TotalPrice <= 0) errors.Add("TotalPrice must be greater than zero.");
-        if (body.OrderTimestamp is null) errors.Add("OrderTimestamp is required.");
         return errors;
     }
 
