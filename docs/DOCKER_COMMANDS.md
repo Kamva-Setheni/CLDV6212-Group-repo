@@ -54,12 +54,12 @@ functions. Test every route against `http://localhost:7071/api`.
 
 ```powershell
 docker login
-docker tag coffeenchill-functions:v1.0 lesegokhaole/coffeenchill-functions:v1.0
-docker push lesegokhaole/coffeenchill-functions:v1.0
+docker tag coffeenchill-functions:v1.0 heistherealhlogi/coffeenchill-functions:v1.0
+docker push heistherealhlogi/coffeenchill-functions:v1.0
 
 docker pull mcr.microsoft.com/azure-storage/azurite
-docker tag mcr.microsoft.com/azure-storage/azurite lesegokhaole/coffeenchill-azurite:v1.0
-docker push lesegokhaole/coffeenchill-azurite:v1.0
+docker tag mcr.microsoft.com/azure-storage/azurite heistherealhlogi/coffeenchill-azurite:v1.0
+docker push heistherealhlogi/coffeenchill-azurite:v1.0
 ```
 
 Only the authenticated Docker Hub owner should run the push commands.
@@ -74,10 +74,10 @@ the local emulator; that flag is not used with a real Azure Storage service.
 
 ```powershell
 # Build and tag the exact image declared by docker-compose.yml.
-docker build -t lesegokhaole/coffeenchill-functions:v2.0 .
+docker build -t heistherealhlogi/coffeenchill-functions:v2.0 .
 
 # The account owner may then publish it. Do not push unless you own the account.
-docker push lesegokhaole/coffeenchill-functions:v2.0
+docker push heistherealhlogi/coffeenchill-functions:v2.0
 
 # Validate the configuration, pull images, and start the full Part 2 stack.
 docker compose config
@@ -99,8 +99,8 @@ docker compose up -d
 ## 7. Pulling images on a clean machine
 
 ```powershell
-docker pull lesegokhaole/coffeenchill-functions:v1.0
-docker pull lesegokhaole/coffeenchill-azurite:v1.0
+docker pull heistherealhlogi/coffeenchill-functions:v1.0
+docker pull heistherealhlogi/coffeenchill-azurite:v1.0
 ```
 
 Repeat steps 1, 2, and 4, substituting the pulled image names.

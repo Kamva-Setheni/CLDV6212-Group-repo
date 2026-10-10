@@ -43,7 +43,7 @@ of creating duplicate rows.
 
 ## Handoff contract
 
-- Hlogi: build this merged source as `lesegokhaole/coffeenchill-functions:v2.0`; the Compose
+- Hlogi: build this merged source as `heistherealhlogi/coffeenchill-functions:v2.0`; the Compose
   file already supplies the service-name Azurite connection string.
 - Kamva: use `POST /api/orders/queue` followed by status polling in Postman. Use the response
   shape documented above and retain the negative `400` and `404` cases.
