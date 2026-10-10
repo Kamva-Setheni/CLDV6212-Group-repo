@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using CoffeeAndChill.DTOs;
 using CoffeeAndChill.Models;
 using CoffeeAndChill.Services;
 using Microsoft.Azure.Functions.Worker;
@@ -9,8 +10,8 @@ using Microsoft.Extensions.Logging;
 namespace CoffeeAndChill.Functions.Orders;
 
 /// <summary>
-/// Accepts an order and queues it immediately. Processing happens asynchronously in
-/// <see cref="ProcessOrderQueue"/>, so the caller is not held up by the barista lifecycle.
+/// Accepts an order, validates it and queues it immediately. Processing happens
+/// asynchronously in ProcessOrderQueue, so the caller is not held up by the barista lifecycle.
 /// </summary>
 public sealed class QueueOrderFunction
 {
@@ -22,10 +23,10 @@ public sealed class QueueOrderFunction
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "orders/queue")] HttpRequestData request)
     {
-        Order? order;
+        CreateOrderRequest? body;
         try
         {
-            order = await JsonSerializer.DeserializeAsync<Order>(request.Body, new JsonSerializerOptions
+            body = await JsonSerializer.DeserializeAsync<CreateOrderRequest>(request.Body, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
@@ -36,7 +37,7 @@ public sealed class QueueOrderFunction
             return await WriteErrorAsync(request, HttpStatusCode.BadRequest, "The order body must be valid JSON.");
         }
 
-        var errors = Validate(order);
+        var errors = Validate(body);
         if (errors.Count > 0)
         {
             var invalid = request.CreateResponse(HttpStatusCode.BadRequest);
@@ -44,10 +45,18 @@ public sealed class QueueOrderFunction
             return invalid;
         }
 
+        var order = new Order
+        {
+            OrderId = body!.OrderId!.Trim(),
+            CustomerName = body.CustomerName!.Trim(),
+            SelectedItemSKUs = body.SelectedItemSKUs!.Select(sku => sku.Trim()).ToList(),
+            TotalPrice = body.TotalPrice,
+            OrderTimestamp = body.OrderTimestamp ?? DateTimeOffset.UtcNow
+        };
+
         var queue = await OrderQueue.GetAsync();
-        var message = JsonSerializer.Serialize(order);
-        await queue.SendMessageAsync(message);
-        _logger.LogInformation("Order {OrderId} was queued for asynchronous processing.", order!.OrderId);
+        await queue.SendMessageAsync(JsonSerializer.Serialize(order));
+        _logger.LogInformation("Order {OrderId} was queued for asynchronous processing.", order.OrderId);
 
         var accepted = request.CreateResponse(HttpStatusCode.Accepted);
         await accepted.WriteAsJsonAsync(new
@@ -59,21 +68,20 @@ public sealed class QueueOrderFunction
         return accepted;
     }
 
-    private static List<string> Validate(Order? order)
+    private static List<string> Validate(CreateOrderRequest? body)
     {
         var errors = new List<string>();
-        if (order is null)
+        if (body is null)
         {
             errors.Add("An order body is required.");
             return errors;
         }
 
-        if (string.IsNullOrWhiteSpace(order.OrderId)) errors.Add("OrderId is required.");
-        if (string.IsNullOrWhiteSpace(order.CustomerName)) errors.Add("CustomerName is required.");
-        if (order.SelectedItemSKUs is null || order.SelectedItemSKUs.Count == 0 || order.SelectedItemSKUs.Any(string.IsNullOrWhiteSpace))
+        if (string.IsNullOrWhiteSpace(body.OrderId)) errors.Add("OrderId is required.");
+        if (string.IsNullOrWhiteSpace(body.CustomerName)) errors.Add("CustomerName is required.");
+        if (body.SelectedItemSKUs is null || body.SelectedItemSKUs.Count == 0 || body.SelectedItemSKUs.Any(string.IsNullOrWhiteSpace))
             errors.Add("SelectedItemSKUs must contain at least one SKU.");
-        if (order.TotalPrice <= 0) errors.Add("TotalPrice must be greater than zero.");
-        if (order.OrderTimestamp == default) errors.Add("OrderTimestamp is required.");
+        if (body.TotalPrice <= 0) errors.Add("TotalPrice must be greater than zero.");
         return errors;
     }
 
