@@ -608,7 +608,7 @@ use. Docker Hub publication is performed only by the authenticated account owner
 | Hlogi | WP3 and WP4 | Versioned Docker Hub image and Docker Compose integration. |
 | Kamva | WP5 | Full Postman collection, README finalisation, and video demonstration. |
 
-**Demo Video:** <link coming soon>
+**Demo Video:** https://youtu.be/RFvFx3hVzYo
 
    ### How to test with Postman
    1. Import `docs/PostmanCollection.json` into Postman.
@@ -621,3 +621,4 @@ use. Docker Hub publication is performed only by the authenticated account owner
 AI coding assistance was used for planning, code-review support, and integration debugging. Team
 members review, understand, test, and can explain the submitted implementation.
 
+   
