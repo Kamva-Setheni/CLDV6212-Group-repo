@@ -20,7 +20,7 @@ complete only after the stated evidence exists and identifies the current final 
 
 - Capture evidence from the final branch/image, not an earlier ZIP or stale image.
 - Keep screenshots readable: include the command, date/time if visible, and outcome.
-- Do not commit Docker credentials or private account details.
+- Do not commit Docker credentials or private account details.docker ps
 - The official Part 1 addendum requires `staff-docs` Azure Blob Storage. Capture document
   endpoint evidence from the local Azurite Blob service, not an Azure File Share.
 

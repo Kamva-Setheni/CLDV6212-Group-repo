@@ -1,100 +1,337 @@
 {
   "info": {
-    "_postman_id": "a7e04b8d-c3c3-47da-ae2b-572d68a775b7",
+    "_postman_id": "5e8f4af0-cb3c-49aa-9df4-b56fed1adea6",
     "name": "CoffeeNChill Part 1 and Part 2 API",
     "description": "Verification collection for all CoffeeNChill HTTP endpoints. Run the Part 1 folders in order; attach an allowed sample document to the upload-success request. For Part 2, queue an order and then poll its status until it reaches Collected.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58867456",
+    "_collection_link": "https://go.postman.co/collection/58867456-5e8f4af0-cb3c-49aa-9df4-b56fed1adea6?source=collection_link"
   },
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:7071/api",
-      "type": "string"
-    },
-    {
-      "key": "orderId",
-      "value": "ORD-2026-8801",
-      "type": "string"
-    }
-  ],
   "item": [
     {
       "name": "Menu Items",
       "item": [
         {
           "name": "Create Menu Item - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.rowKey).to.eql('COF-001');",
+                  "pm.expect(body.category).to.eql('Hot Drinks');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "description": "Creates the test Espresso menu item and verifies the created entity.",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"category\": \"Hot Drinks\",\n  \"sku\": \"COF-001\",\n  \"name\": \"Espresso\",\n  \"description\": \"Single shot espresso\",\n  \"price\": 25.00,\n  \"isAvailable\": true\n}" },
-            "url": "{{baseUrl}}/menu"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"Hot Drinks\",\n  \"sku\": \"COF-001\",\n  \"name\": \"Espresso\",\n  \"description\": \"Single shot espresso\",\n  \"price\": 25.00,\n  \"isAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu"
+              ]
+            },
+            "description": "Creates the test Espresso menu item and verifies the created entity."
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 201', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.expect(body.rowKey).to.eql('COF-001');", "pm.expect(body.category).to.eql('Hot Drinks');"] } }]
+          "response": []
         },
         {
           "name": "Create Menu Item - Validation Failure",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));",
+                  "pm.expect(pm.response.json().errors).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "description": "Verifies validation rejects a menu item with no name and a zero price.",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"category\": \"Hot Drinks\",\n  \"sku\": \"INVALID-001\",\n  \"description\": \"Invalid item\",\n  \"price\": 0,\n  \"isAvailable\": true\n}" },
-            "url": "{{baseUrl}}/menu"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"Hot Drinks\",\n  \"sku\": \"INVALID-001\",\n  \"description\": \"Invalid item\",\n  \"price\": 0,\n  \"isAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu"
+              ]
+            },
+            "description": "Verifies validation rejects a menu item with no name and a zero price."
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().errors).to.be.an('array');"] } }]
+          "response": []
         },
         {
           "name": "Create Menu Item - Duplicate Conflict",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 409', () => pm.response.to.have.status(409));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "description": "Repeats the successful request to verify a duplicate SKU within the same category returns a conflict.",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"category\": \"Hot Drinks\",\n  \"sku\": \"COF-001\",\n  \"name\": \"Duplicate Espresso\",\n  \"description\": \"Duplicate test item\",\n  \"price\": 25.00,\n  \"isAvailable\": true\n}" },
-            "url": "{{baseUrl}}/menu"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"Hot Drinks\",\n  \"sku\": \"COF-001\",\n  \"name\": \"Duplicate Espresso\",\n  \"description\": \"Duplicate test item\",\n  \"price\": 25.00,\n  \"isAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu"
+              ]
+            },
+            "description": "Repeats the successful request to verify a duplicate SKU within the same category returns a conflict."
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 409', () => pm.response.to.have.status(409));"] } }]
+          "response": []
         },
         {
           "name": "Get All Menu Items",
-          "request": { "method": "GET", "description": "Lists all menu items and confirms the API always returns an array.", "url": "{{baseUrl}}/menu" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json()).to.be.an('array');"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json()).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu"
+              ]
+            },
+            "description": "Lists all menu items and confirms the API always returns an array."
+          },
+          "response": []
         },
         {
           "name": "Get Menu Items By Category - Success",
-          "request": { "method": "GET", "description": "Returns the menu array for the Hot Drinks category.", "url": "{{baseUrl}}/menu/category/Hot%20Drinks" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json()).to.be.an('array');"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json()).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/menu/category/Hot%20Drinks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                "category",
+                "Hot%20Drinks"
+              ]
+            },
+            "description": "Returns the menu array for the Hot Drinks category."
+          },
+          "response": []
         },
         {
           "name": "Update Menu Item - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
-            "description": "Updates the menu item created earlier in the collection.",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Double Espresso\",\n  \"description\": \"Two shots of espresso\",\n  \"price\": 35.00,\n  \"isAvailable\": true\n}" },
-            "url": "{{baseUrl}}/menu/Hot%20Drinks/COF-001"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Double Espresso\",\n  \"description\": \"Two shots of espresso\",\n  \"price\": 35.00,\n  \"isAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/menu/Hot%20Drinks/COF-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                "Hot%20Drinks",
+                "COF-001"
+              ]
+            },
+            "description": "Updates the menu item created earlier in the collection."
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"] } }]
+          "response": []
         },
         {
           "name": "Update Menu Item - Not Found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
-            "description": "Verifies an update for a missing SKU returns not found.",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Missing Item\",\n  \"description\": \"Not stored\",\n  \"price\": 20.00,\n  \"isAvailable\": true\n}" },
-            "url": "{{baseUrl}}/menu/Hot%20Drinks/DOES-NOT-EXIST"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Missing Item\",\n  \"description\": \"Not stored\",\n  \"price\": 20.00,\n  \"isAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/menu/Hot%20Drinks/DOES-NOT-EXIST",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                "Hot%20Drinks",
+                "DOES-NOT-EXIST"
+              ]
+            },
+            "description": "Verifies an update for a missing SKU returns not found."
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 404', () => pm.response.to.have.status(404));"] } }]
+          "response": []
         },
         {
           "name": "Delete Menu Item - Success",
-          "request": { "method": "DELETE", "description": "Deletes the test item after all read and update checks are complete.", "url": "{{baseUrl}}/menu/Hot%20Drinks/COF-001" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 204', () => pm.response.to.have.status(204));"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 204', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/menu/Hot%20Drinks/COF-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                "Hot%20Drinks",
+                "COF-001"
+              ]
+            },
+            "description": "Deletes the test item after all read and update checks are complete."
+          },
+          "response": []
         },
         {
           "name": "Delete Menu Item - Not Found",
-          "request": { "method": "DELETE", "description": "Immediately repeats deletion to verify the missing-item response.", "url": "{{baseUrl}}/menu/Hot%20Drinks/COF-001" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 404', () => pm.response.to.have.status(404));"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/menu/Hot%20Drinks/COF-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                "Hot%20Drinks",
+                "COF-001"
+              ]
+            },
+            "description": "Immediately repeats deletion to verify the missing-item response."
+          },
+          "response": []
         }
       ]
     },
@@ -103,33 +340,171 @@
       "item": [
         {
           "name": "Upload Staff Document - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));\npm.expect(pm.response.json()).to.have.property('fileName');"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "description": "Attach a small PDF, DOC, DOCX, PNG, or JPEG file named staff-document.pdf before running; verifies a permitted staff document uploads.",
-            "body": { "mode": "formdata", "formdata": [{ "key": "file", "type": "file", "src": [] }] },
-            "url": "{{baseUrl}}/documents/upload"
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [
+                    "staff-recipe-guide.pdf"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                "upload"
+              ]
+            },
+            "description": "Attach a small PDF, DOC, DOCX, PNG, or JPEG file named staff-document.pdf before running; verifies a permitted staff document uploads."
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json()).to.have.property('fileName');"] } }]
+          "response": []
         },
         {
           "name": "Upload Staff Document - No File",
-          "request": { "method": "POST", "description": "Verifies an empty multipart request is rejected.", "body": { "mode": "formdata", "formdata": [] }, "url": "{{baseUrl}}/documents/upload" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 400', () => pm.response.to.have.status(400));"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                "upload"
+              ]
+            },
+            "description": "Verifies an empty multipart request is rejected."
+          },
+          "response": []
         },
         {
           "name": "List Staff Documents",
-          "request": { "method": "GET", "description": "Lists document metadata from the staff-docs Azure Blob container.", "url": "{{baseUrl}}/documents" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json()).to.be.an('array');"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json()).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents"
+              ]
+            },
+            "description": "Lists document metadata from the staff-docs Azure Blob container."
+          },
+          "response": []
         },
         {
           "name": "Download Staff Document - Success",
-          "request": { "method": "GET", "description": "Change staff-document.pdf to the exact name uploaded in the success request, then verify download.", "url": "{{baseUrl}}/documents/download/staff-document.pdf" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents/download/staff-recipe-guide.pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                "download",
+                "staff-recipe-guide.pdf"
+              ]
+            },
+            "description": "Change staff-document.pdf to the exact name uploaded in the success request, then verify download."
+          },
+          "response": []
         },
         {
           "name": "Download Staff Document - Not Found",
-          "request": { "method": "GET", "description": "Verifies a request for a missing staff document returns not found.", "url": "{{baseUrl}}/documents/download/does-not-exist.pdf" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 404', () => pm.response.to.have.status(404));"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents/download/does-not-exist.pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                "download",
+                "does-not-exist.pdf"
+              ]
+            },
+            "description": "Verifies a request for a missing staff document returns not found."
+          },
+          "response": []
         }
       ]
     },
@@ -138,41 +513,172 @@
       "item": [
         {
           "name": "Queue Order - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 202', () => pm.response.to.have.status(202));\nconst body = pm.response.json();\npm.expect(body.orderId).to.eql(pm.collectionVariables.get('orderId'));\npm.expect(body.queue).to.eql('order-processing-queue');\npm.expect(body.statusUrl).to.contain('/orders/');"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "description": "Queues a valid order and verifies the client receives an immediate accepted response rather than waiting for preparation.",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"customerName\": \"Jane Smith\",\n  \"selectedItemSKUs\": [\"COF-001\", \"PAS-104\"],\n  \"totalPrice\": 65.00,\n  \"orderTimestamp\": \"2026-10-12T10:15:00Z\"\n}" },
-            "url": "{{baseUrl}}/orders/queue"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"customerName\": \"Jane Smith\",\n  \"SelectedItemSKUs\": [\"COF-001\", \"PAS-104\"],\n  \"totalPrice\": 65.00,\n  \"orderTimestamp\": \"2026-10-12T10:15:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/queue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "queue"
+              ]
+            },
+            "description": "Queues a valid order and verifies the client receives an immediate accepted response rather than waiting for preparation."
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 202', () => pm.response.to.have.status(202));", "const body = pm.response.json();", "pm.expect(body.orderId).to.eql(pm.collectionVariables.get('orderId'));", "pm.expect(body.queue).to.eql('order-processing-queue');", "pm.expect(body.statusUrl).to.contain('/orders/');"] } }]
+          "response": []
         },
         {
           "name": "Get Order Status - Existing",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));\nconst body = pm.response.json();\npm.expect(body.orderId).to.eql(pm.collectionVariables.get('orderId'));\npm.expect(body.status).to.be.oneOf(['Received', 'Preparing', 'Ready', 'Collected']);\npm.expect(body).to.have.property('lastUpdated');"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "   const url = pm.variables.replaceIn(\"{{baseUrl}}/orders/{{orderId}}/status\");\r\n   let tries = 0;\r\n   const maxTries = 15;\r\n\r\n   function poll() {\r\n       pm.sendRequest(url, function (err, res) {\r\n           tries++;\r\n           if ((!err && res.code === 200) || tries >= maxTries) {\r\n               return;\r\n           }\r\n           setTimeout(poll, 5000);\r\n       });\r\n   }\r\n   poll();"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "description": "Run after Queue Order - Success. If the worker is still processing, send this request again until the status is Collected.",
-            "url": "{{baseUrl}}/orders/{{orderId}}/status"
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            },
+            "description": "Run after Queue Order - Success. If the worker is still processing, send this request again until the status is Collected."
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));", "const body = pm.response.json();", "pm.expect(body.orderId).to.eql(pm.collectionVariables.get('orderId'));", "pm.expect(body.status).to.be.oneOf(['Received', 'Preparing', 'Ready', 'Collected']);", "pm.expect(body).to.have.property('lastUpdated');"] } }]
+          "response": []
         },
         {
           "name": "Get Order Status - Not Found",
-          "request": { "method": "GET", "description": "Verifies the order status endpoint returns a JSON error for an unknown order.", "url": "{{baseUrl}}/orders/ORD-DOES-NOT-EXIST/status" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 404', () => pm.response.to.have.status(404));", "pm.expect(pm.response.json()).to.have.property('error');"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));",
+                  "pm.expect(pm.response.json()).to.have.property('error');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/ORD-DOES-NOT-EXIST/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "ORD-DOES-NOT-EXIST",
+                "status"
+              ]
+            },
+            "description": "Verifies the order status endpoint returns a JSON error for an unknown order."
+          },
+          "response": []
         },
         {
           "name": "Queue Order - Validation Failure",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));",
+                  "pm.expect(pm.response.json().errors).to.be.an('array');",
+                  "pm.expect(pm.response.json().errors.length).to.be.greaterThan(0);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "description": "Verifies invalid order data is rejected before it reaches the queue.",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"orderId\": \"\",\n  \"customerName\": \"\",\n  \"selectedItemSKUs\": [],\n  \"totalPrice\": 0\n}" },
-            "url": "{{baseUrl}}/orders/queue"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"\",\n  \"customerName\": \"\",\n  \"selectedItemSKUs\": [],\n  \"totalPrice\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/queue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "queue"
+              ]
+            },
+            "description": "Verifies invalid order data is rejected before it reaches the queue."
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status is 400', () => pm.response.to.have.status(400));", "pm.expect(pm.response.json().errors).to.be.an('array');", "pm.expect(pm.response.json().errors.length).to.be.greaterThan(0);"] } }]
+          "response": []
         }
       ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:7071/api"
+    },
+    {
+      "key": "orderId",
+      "value": "ORD-2026-8801"
     }
   ]
 }
