@@ -40,8 +40,8 @@ for the submission/video evidence.
   document download, and document-not-found.
 - The document scenarios use the required local Blob container, `staff-docs`.
 - Public Docker Hub images have been published as
-  `lesegokhaole/coffeenchill-functions:v1.0` and
-  `lesegokhaole/coffeenchill-azurite:v1.0`.
+`heistherealhlogi/azurefunc-cldv6212:v1.1` and
+`heistherealhlogi/coffeenchill-azurite:v1.0`.
 - `PostmanCollection.json` is valid JSON and contains all 14 saved requests,
   each with a Postman test. The upload request still needs a real permitted
   file selected in the Postman desktop app before the Collection Runner proof
