@@ -610,6 +610,12 @@ use. Docker Hub publication is performed only by the authenticated account owner
 
 **Demo Video:** <link coming soon>
 
+   ### How to test with Postman
+   1. Import `docs/PostmanCollection.json` into Postman.
+   2. Set Postman's working directory to the repo folder so `docs/staff-recipe-guide.pdf` is found.
+   3. Reset before every full run: `docker compose down -v`, then `docker compose up`.
+   4. Run the collection in the Runner with a 6000 ms delay.
+
 ## AI use disclosure
 
 AI coding assistance was used for planning, code-review support, and integration debugging. Team
